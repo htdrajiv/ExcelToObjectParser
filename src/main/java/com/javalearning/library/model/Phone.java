@@ -1,4 +1,4 @@
-package com.javalearning.library;
+package com.javalearning.library.model;
 
 public class Phone {
     private String homePhone;

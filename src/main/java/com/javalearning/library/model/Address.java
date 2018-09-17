@@ -1,7 +1,5 @@
 package com.javalearning.library.model;
 
-import com.javalearning.library.Phone;
-
 /*
  * for testing com.javalearning.library.ExcelFileReader class in com.javaclass.csvfilereader.com.javalearning.library.main package
  * */
