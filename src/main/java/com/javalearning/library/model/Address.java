@@ -1,7 +1,7 @@
 package com.javalearning.library.model;
 
 /*
- * for testing com.javalearning.library.ExcelFileReader class in com.javaclass.csvfilereader.com.javalearning.library.main package
+ * for testing com.javalearning.library.ExcelFileReaderSimple class in com.javaclass.csvfilereader.com.javalearning.library.main package
  * */
 public class Address {
     private Long id;

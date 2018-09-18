@@ -11,7 +11,7 @@ import java.util.List;
 public class ExcelFileReaderTest {
     @Test
     public void TestFileReaderParse() {
-        ExcelFileReaderMoreAdvance fileReader = new ExcelFileReaderMoreAdvance();
+        ExcelFileReader fileReader = new ExcelFileReader();
 
         ClassLoader classLoader = getClass().getClassLoader();
         String excelFilePath = new File(classLoader.getResource("customer.xlsx").getFile()).getPath();
@@ -28,11 +28,11 @@ public class ExcelFileReaderTest {
         Assert.assertEquals(30, customer.getAge());
 
 
-        Assert.assertEquals(1, addressList.size());
-        Assert.assertFalse(addressList.size() > 1);
+        Assert.assertEquals(2, addressList.size());
+        Assert.assertTrue(addressList.size() > 1);
 
         Address address = addressList.get(0);
-        Assert.assertEquals("50266", address.getZipCode());
+        Assert.assertEquals("12345", address.getZipCode());
         Assert.assertEquals("US", address.getCountry());
 
     }

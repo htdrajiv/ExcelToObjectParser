@@ -3,13 +3,13 @@ package com.javalearning.library.model;
 import java.util.List;
 
 /*
-* for testing com.javalearning.library.ExcelFileReader class in com.javaclass.csvfilereader.com.javalearning.library.main package
+* for testing com.javalearning.library.ExcelFileReaderSimple class in com.javaclass.csvfilereader.com.javalearning.library.main package
 * */
 public class Customer {
     private Long id;
     private String name;
     private int age;
-    private Address address;
+    private List<Address> address;
 
     public Long getId() {
         return id;
@@ -35,11 +35,11 @@ public class Customer {
         this.age = age;
     }
 
-    public Address getAddress() {
+    public List<Address> getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(List<Address> address) {
         this.address = address;
     }
 }
