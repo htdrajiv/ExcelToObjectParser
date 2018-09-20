@@ -20,15 +20,14 @@ public class ExcelFileReaderTest {
         List<Address> addressList = fileReader.parse(excelFilePath, "address", Address.class);
 
 
-        Assert.assertEquals(1,customerList.size());
-        Assert.assertFalse(customerList.size() > 1);
+        Assert.assertTrue(customerList.size() > 1);
 
         Customer customer = customerList.get(0);
         Assert.assertEquals("customer1", customer.getName());
         Assert.assertEquals(30, customer.getAge());
 
 
-        Assert.assertEquals(2, addressList.size());
+        Assert.assertEquals(7, addressList.size());
         Assert.assertTrue(addressList.size() > 1);
 
         Address address = addressList.get(0);
