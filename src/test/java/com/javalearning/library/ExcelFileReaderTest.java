@@ -6,12 +6,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExcelFileReaderTest {
     @Test
     public void TestFileReaderParse() {
-        ExcelFileReader fileReader = new ExcelFileReader();
+        Map<String, String> sheetNameToClassNameMap = new HashMap<>();
+        sheetNameToClassNameMap.put("customer","customer");
+        sheetNameToClassNameMap.put("address","address");
+        sheetNameToClassNameMap.put("phone","phone");
+        ExcelFileReader fileReader = new ExcelFileReader(sheetNameToClassNameMap);
 
         ClassLoader classLoader = getClass().getClassLoader();
         String excelFilePath = new File(classLoader.getResource("customer.xlsx").getFile()).getPath();

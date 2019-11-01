@@ -6,16 +6,33 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 class ExcelFileReader {
     private Logger logger = LogManager.getLogger(ExcelFileReader.class);
     private DataFormatter dataFormatter = new DataFormatter();
+    private Map<String, String> sheetNameToClassNameMap;
+    private String csvLineDelimeter; // to use for csv files.
+
+    public ExcelFileReader(Map<String, String> sheetNameToClassNameMap){
+        this.sheetNameToClassNameMap = sheetNameToClassNameMap;
+    }
+
+    public ExcelFileReader(Map<String, String> sheetNameToClassNameMap, String csvLineDelimeter){
+        this.sheetNameToClassNameMap = sheetNameToClassNameMap;
+        this.csvLineDelimeter = csvLineDelimeter;
+    }
 
     /*
      * @param filePath: excel file path which contains information that we are looking for our type T objects.
@@ -35,9 +52,14 @@ class ExcelFileReader {
     private JsonObject getExcelDataAsJsonObject(File excelFile, String sheetName)  {
         logger.info("Started reading excel file "+ excelFile.getName()+"...");
         JsonObject sheetsJsonObject = new JsonObject();
+        int i = excelFile.getName().lastIndexOf('.');
+        String extension = excelFile.getName().substring(i+1);
         Workbook workbook = null;
         try {
-            workbook = new XSSFWorkbook(excelFile);
+            if(extension.equalsIgnoreCase("csv"))
+                workbook = readCsv(excelFile, sheetName);
+            else
+                workbook = readXlsx(excelFile);
             JsonArray sheetArray = new JsonArray();
             List<String> columnNames = new ArrayList<>();
             Sheet sheet = workbook.getSheet(sheetName);
@@ -62,18 +84,42 @@ class ExcelFileReader {
         return sheetsJsonObject;
     }
 
+    private Workbook readXlsx(File inputFile) throws IOException, InvalidFormatException {
+        return new XSSFWorkbook(inputFile);
+    }
+
+    private Workbook readCsv(File inputFile, String sheetName) throws IOException {
+        XSSFWorkbook workBook = new XSSFWorkbook();
+        XSSFSheet sheet = workBook.createSheet(sheetName);
+        String currentLine=null;
+        int rowNum=0;
+        Scanner scan = new Scanner(inputFile);
+        scan.useDelimiter(csvLineDelimeter);
+        while (scan.hasNext()) {
+            currentLine = scan.next();
+            String str[] = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+            XSSFRow currentRow = sheet.createRow(rowNum);
+            for(int i=0;i<str.length;i++){
+                str[i] = str[i].replaceAll("\"","");
+                currentRow.createCell(i).setCellValue(str[i]);
+            }
+            rowNum++;
+        }
+        return workBook;
+    }
+
     private void processValues(Row currentRow,List<String> columnNames ,JsonObject jsonObject, Workbook workbook) throws Exception {
         for (int j = 0; j < columnNames.size(); j++) {
             if (currentRow.getCell(j) != null) {
-                if (currentRow.getCell(j).getCellType() == CellType.BLANK) {
+                if (currentRow.getCell(j).getCellTypeEnum() == CellType.BLANK) {
                     jsonObject.addProperty(columnNames.get(j), "");
                 } else {
                     String cellValue = dataFormatter.formatCellValue(currentRow.getCell(j));
                     if(isListReferenceType(cellValue)){
-                        jsonObject.add(columnNames.get(j), parseListReference(cellValue.split(":")[1], workbook));
+                        jsonObject.add(sheetNameToClassNameMap.get(columnNames.get(j)), parseListReference(cellValue.split(":")[1], workbook));
                     }
                     else if(isReferenceType(cellValue)){
-                        jsonObject.add(columnNames.get(j), parseReference(cellValue.split(":")[1], workbook));
+                        jsonObject.add(sheetNameToClassNameMap.get(columnNames.get(j)), parseReference(cellValue.split(":")[1], workbook));
                     }else
                         jsonObject.addProperty(columnNames.get(j), cellValue);
                 }
